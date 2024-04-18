@@ -237,7 +237,7 @@ class TokenProcessor {
                     declaredVariables.put(lexema, i);
                 } else {
                     // Error: Variable duplicada en la sección de declaración
-                    System.out.println("Error: Variable '" + lexema + "' declared multiple times in the declaration section (line " + token.getLine() + ")");
+                    System.out.println("Error: Variable '" + lexema + "' duplicada (line " + token.getLine() + ")");
                     token.setError(true);
                 }
             } 
@@ -249,13 +249,11 @@ class TokenProcessor {
                 String lexema = token.getLexema();
                 if (!declaredVariables.containsKey(lexema)) {
                     // Error: Variable no declarada usada fuera de la sección de declaración
-                    System.out.println("Error: Variable '" + lexema + "' used outside declaration section (line " + token.getLine() + ")");
+                    System.out.println("Error: Variable '" + lexema + "' no esta declarada (linea " + token.getLine() + ")");
                     token.setError(true);
                 }
             }
         }
-
-        
         
     }
     
