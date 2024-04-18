@@ -50,7 +50,7 @@ public class Token {
 
     @Override
     public String toString() {
-        return lexema + ", " + token + ", " + positionTable + ", " + line;
+        return lexema + " " + token + " " + positionTable + " " + line;
     }
 
     public void setError(boolean b) {

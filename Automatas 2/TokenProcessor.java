@@ -111,8 +111,6 @@ class TokenProcessor {
         return symbolTable;
     }
 
-    
-
     private static void writeSymbolTableToFile(Map<String, Symbol> symbolTable, String tablaSimbolos) {
         StringBuilder sb = new StringBuilder();
 
@@ -167,15 +165,14 @@ class TokenProcessor {
         }
     }
 
-
-    
     private static void reemplazarVariablesSimbolo(List<Token> tokens) {
         int indiceVariableSimbolo = 0;
         Map<String, Integer> variablesSimbolos = new HashMap<>(); // // Mapa para almacenar las variables y sus indices
         for (Token token : tokens) {
             if (token.getLexema().equals("inicio")) {
                 indiceVariableSimbolo = 0;
-            } else if (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53 || token.getToken() == -54) {
+            } else if (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53
+                    || token.getToken() == -54) {
                 String lexema = token.getLexema();
                 if (!variablesSimbolos.containsKey(lexema)) {
                     variablesSimbolos.put(lexema, indiceVariableSimbolo);
@@ -187,10 +184,11 @@ class TokenProcessor {
             }
         }
     }
+
     private static void reemplazarVariablesDireccion(List<Token> tokens) {
         int indiceVariableDireccion = 0;
         Map<String, Integer> variablesDirecciones = new HashMap<>(); // Mapa para almacenar las variables y sus indices
-    
+
         for (Token token : tokens) {
             if (token.getLexema().equals("inicio")) {
                 indiceVariableDireccion = 0;
@@ -219,44 +217,47 @@ class TokenProcessor {
     }
 
     private static void checkVariableDeclaration(List<Token> tokens) {
-        Map<String, Integer> declaredVariables = new HashMap<>(); // Almacenar las variables declaradas en la sección de declaración
+        Map<String, Integer> declaredVariables = new HashMap<>(); // Almacenar las variables declaradas en la sección de
+                                                                  // declaración
         boolean dentroDeDeclaracion = false;
-    
+
         for (int i = 0; i < tokens.size(); i++) {
             Token token = tokens.get(i);
-    
-            if (token.getToken()==-15) {
+
+            if (token.getLexema().equals("variables")) {
                 dentroDeDeclaracion = true;
-            } else if (token.getToken()==-2) {
+            } else if (token.getLexema().equals("inicio")) {
                 dentroDeDeclaracion = false;
             }
-    
-            if (dentroDeDeclaracion && (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53 || token.getToken() == -54)) {
+
+            if (dentroDeDeclaracion && (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53
+                    || token.getToken() == -54)) {
                 String lexema = token.getLexema();
                 if (!declaredVariables.containsKey(lexema)) {
                     declaredVariables.put(lexema, i);
                 } else {
                     // Error: Variable duplicada en la sección de declaración
-                    System.out.println("Error: Variable '" + lexema + "' duplicada (line " + token.getLine() + ")");
-                    token.setError(true);
-                }
-            } 
-        }
-    
-        // Verificar uso de variables fuera de la sección de declaración
-        for (Token token : tokens) {
-            if (!dentroDeDeclaracion && (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53 || token.getToken() == -54)) {
-                String lexema = token.getLexema();
-                if (!declaredVariables.containsKey(lexema)) {
-                    // Error: Variable no declarada usada fuera de la sección de declaración
-                    System.out.println("Error: Variable '" + lexema + "' no esta declarada (linea " + token.getLine() + ")");
+                    System.out.println("Error: Variable '" + lexema
+                            + "' declared multiple times in the declaration section (line " + token.getLine() + ")");
                     token.setError(true);
                 }
             }
         }
-        
+        // Verificar si alguna variable fuera de la sección de declaración fue declarada
+        // previamente
+        for (Token token : tokens) {
+            if (!dentroDeDeclaracion && (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53
+                    || token.getToken() == -54)) {
+                String lexema = token.getLexema();
+                if (!declaredVariables.containsKey(lexema)) {
+                    // Error: Variable no declarada usada fuera de la sección de declaración
+                    System.out.println(
+                            "Error: Variable '" + lexema + "' no está declarada (linea " + token.getLine() + ")");
+                    token.setError(true);
+                }
+            }
+        }
     }
-    
 
     public static void main(String[] args) throws IOException {
         List<Token> tokens = leerTokens(archivoEntrada);
