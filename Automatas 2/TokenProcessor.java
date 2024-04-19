@@ -65,9 +65,9 @@ class TokenProcessor {
             tipo = "-51";
         } else if (lexema.contains("%")) {
             tipo = "-52";
-        } else if (lexema.contains("#")) {
-            tipo = "-53";
         } else if (lexema.contains("$")) {
+            tipo = "-53";
+        } else if (lexema.contains("#")) {
             tipo = "-54";
         } else if (lexema.contains("@")) {
             tipo = "-55";
@@ -81,9 +81,9 @@ class TokenProcessor {
             valor = "0";
         } else if (token.contains("%")) {
             valor = "0.0";
-        } else if (token.contains("#")) {
-            valor = "true";
         } else if (token.contains("$")) {
+            valor = "true";
+        } else if (token.contains("#")) {
             valor = "null";
         }
         return valor;
@@ -216,10 +216,11 @@ class TokenProcessor {
         }
     }
 
-    private static void checkVariableDeclaration(List<Token> tokens) {
-        Map<String, Integer> declaredVariables = new HashMap<>(); // Almacenar las variables declaradas en la sección de
-                                                                  // declaración
+    private static boolean checkVariableDeclaration(List<Token> tokens) {
+        boolean error = false;
+        Map<String, Integer> declaredVariables = new HashMap<>();
         boolean dentroDeDeclaracion = false;
+        int tipoDeclaracionActual = -1;
 
         for (int i = 0; i < tokens.size(); i++) {
             Token token = tokens.get(i);
@@ -228,8 +229,31 @@ class TokenProcessor {
                 dentroDeDeclaracion = true;
             } else if (token.getLexema().equals("inicio")) {
                 dentroDeDeclaracion = false;
+                tipoDeclaracionActual = -1;
             }
-
+            // Verificar si estamos dentro de la sección de declaración
+            if (dentroDeDeclaracion) {
+                if (token.getToken() == -11 || token.getToken() == -12 || token.getToken() == -13
+                        || token.getToken() == -14) {
+                    // Actualizar el tipo de declaración actual
+                    tipoDeclaracionActual = token.getToken();
+                } else if (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53
+                        || token.getToken() == -54) {
+                    // Verificar si el tipo de variable coincide con el tipo de declaración actual
+                    if ((tipoDeclaracionActual == -11 && token.getToken() != -51) ||
+                            (tipoDeclaracionActual == -12 && token.getToken() != -52) ||
+                            (tipoDeclaracionActual == -13 && token.getToken() != -53) ||
+                            (tipoDeclaracionActual == -14 && token.getToken() != -54)) {
+                        // Error: Tipo de variable incorrecto para el tipo de declaración actual
+                        System.out.println("Error: El tipo de variable '" + token.getLexema()
+                                + "' declarado no coincide con el tipo de declaración actual (línea " + token.getLine()
+                                + ")");
+                        token.setError(true);
+                        error = true;
+                    }
+                }
+            }
+            //Checar si la variable esta declarada
             if (dentroDeDeclaracion && (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53
                     || token.getToken() == -54)) {
                 String lexema = token.getLexema();
@@ -238,14 +262,14 @@ class TokenProcessor {
                 } else {
                     // Error: Variable duplicada en la sección de declaración
                     System.out.println("Error: Variable '" + lexema
-                            + "' declared multiple times in the declaration section (line " + token.getLine() + ")");
+                            + "' declarada multiples veces (line " + token.getLine() + ")");
                     token.setError(true);
+                    error = true;
+                    break; // Salir del bucle si se detecta un error
                 }
             }
-        }
-        // Verificar si alguna variable fuera de la sección de declaración fue declarada
-        // previamente
-        for (Token token : tokens) {
+            // Verificar si alguna variable fuera de la sección de declaración fue declarada
+            // previamente
             if (!dentroDeDeclaracion && (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53
                     || token.getToken() == -54)) {
                 String lexema = token.getLexema();
@@ -254,20 +278,30 @@ class TokenProcessor {
                     System.out.println(
                             "Error: Variable '" + lexema + "' no está declarada (linea " + token.getLine() + ")");
                     token.setError(true);
+                    error = true;
+                    break; // Salir del bucle si se detecta un error
                 }
             }
         }
+        return error;
     }
 
-    public static void main(String[] args) throws IOException {
-        List<Token> tokens = leerTokens(archivoEntrada);
-        Map<String, Symbol> symbolTable = processSymbolTable(tokens);
-        Map<String, Symbol> addressTable = processAddressTable(tokens);
-        checkVariableDeclaration(tokens);
-        writeSymbolTableToFile(symbolTable, tablaSimbolos);
-        writeAddressTableToFile(addressTable, tablaDirecciones);
-        reemplazarVariablesDireccion(tokens);
-        reemplazarVariablesSimbolo(tokens);
-        printModifiedTokenTable(tokens);
+    public static void main(String[] args) {
+        boolean errorEnDeclaracion = false;
+        try {
+            List<Token> tokens = leerTokens(archivoEntrada);
+            Map<String, Symbol> symbolTable = processSymbolTable(tokens);
+            Map<String, Symbol> addressTable = processAddressTable(tokens);
+            errorEnDeclaracion = checkVariableDeclaration(tokens);
+            if (!errorEnDeclaracion) {
+                writeSymbolTableToFile(symbolTable, tablaSimbolos);
+                writeAddressTableToFile(addressTable, tablaDirecciones);
+                reemplazarVariablesDireccion(tokens);
+                reemplazarVariablesSimbolo(tokens);
+                printModifiedTokenTable(tokens);
+            }
+        } catch (IOException e) {
+            System.err.println("Se ha producido un error y no se pudo completar el procesamiento.");
+        }
     }
 }
