@@ -253,7 +253,33 @@ class TokenProcessor {
                     }
                 }
             }
-            //Checar si la variable esta declarada
+            // Verificar si hay operaciones y si las variables involucradas tienen tipos
+            // diferentes
+            if (i > 0 && i < tokens.size() - 1) {
+                Token tokenAnterior = tokens.get(i - 1);
+                Token tokenSiguiente = tokens.get(i + 1);
+                if (tokenAnterior != null && tokenSiguiente != null &&
+                        (tokenAnterior.getToken() == -51 || tokenAnterior.getToken() == -52 ||
+                                tokenAnterior.getToken() == -53 || tokenAnterior.getToken() == -54)
+                        &&
+                        (tokenSiguiente.getToken() == -51 || tokenSiguiente.getToken() == -52 ||
+                                tokenSiguiente.getToken() == -53 || tokenSiguiente.getToken() == -54)) {
+                    // Obtener los tipos de las variables
+                    String tipoVariableAnterior = obtenerTipo(tokenAnterior.getLexema());
+                    String tipoVariableSiguiente = obtenerTipo(tokenSiguiente.getLexema());
+                    // Verificar si los tipos de las variables son diferentes
+                    if (!tipoVariableAnterior.equals(tipoVariableSiguiente)) {
+                        // Si los tipos de las variables son diferentes, marcar un error
+                        System.out.println("Error: Operación entre tipos de variables incompatibles: '"
+                                + tokenAnterior.getLexema() +
+                                "' y '" + tokenSiguiente.getLexema() + "' (línea " + token.getLine() + ")");
+                        token.setError(true);
+                        error = true;
+                    }
+                }
+            }
+
+            // Checar si la variable esta declarada
             if (dentroDeDeclaracion && (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53
                     || token.getToken() == -54)) {
                 String lexema = token.getLexema();
@@ -282,6 +308,7 @@ class TokenProcessor {
                     break; // Salir del bucle si se detecta un error
                 }
             }
+
         }
         return error;
     }
