@@ -291,7 +291,6 @@ class TokenProcessor {
                             + "' declarada multiples veces (line " + token.getLine() + ")");
                     token.setError(true);
                     error = true;
-                    break; // Salir del bucle si se detecta un error
                 }
             }
             // Verificar si alguna variable fuera de la sección de declaración fue declarada
@@ -305,7 +304,6 @@ class TokenProcessor {
                             "Error: Variable '" + lexema + "' no está declarada (linea " + token.getLine() + ")");
                     token.setError(true);
                     error = true;
-                    break; // Salir del bucle si se detecta un error
                 }
             }
 
