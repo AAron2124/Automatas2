@@ -12,6 +12,10 @@ public class Cola {
         elementos.add(elemento);
     }
 
+    public void enqueue(Object elemento, Integer posicion) {
+        elementos.add(new Pair(elemento, posicion));
+    }
+
     public Object dequeue() {
         if (isEmpty()) {
             return null; // Manejar cola vacía si es necesario
@@ -22,9 +26,25 @@ public class Cola {
     public boolean isEmpty() {
         return elementos.isEmpty();
     }
-
+   
     @Override
     public String toString() {
         return elementos.toString(); // Devuelve una cadena que representa los elementos de la cola
     }
+    
+    static class Pair {
+        Object first;
+        Integer second;
+
+        public Pair(Object first, Integer second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        @Override
+        public String toString() {
+            return "(" + first.toString() + ", " + second.toString() + ")";
+        }
+    }
 }
+

@@ -100,6 +100,8 @@ public class prueba {
         Pila dir = new Pila();
         Pila est = new Pila();
         int i = 0;
+        System.out.println("Cantidad de tokens encontrados: " + tokens.size());
+        System.out.println("Tokens encontrados: " + tokens);
 
         for (Token token : tokens) {
             if (debeAgregarAlVCI(token)) {
@@ -111,66 +113,52 @@ public class prueba {
                 }
                 
                 if (numeroToken == -8) { // Token "While"
-                    est.push("mientras");
-                    dir.push(i); // Almacena la dirección siguiente al While
-                }
-                if (numeroToken == -17) { // Token "Do"
-                    while (!stack.isEmpty()) {
-                        vci.enqueue(stack.top());
-                        stack.pop();
-                        i++;
-                        posicion.enqueue(i);
-                    }
-                    vci.enqueue(i); // Genera token FALSE
-                    dir.push(i + 1); // Almacena la dirección siguiente al Do
-                    vci.enqueue("hacer"); // Genera token Do
-                    i++;
-                    posicion.enqueue(i);
-                }
-                if (numeroToken == -3 && !est.isEmpty() && est.top().equals("mientras")) { // Token "End"
-                    est.pop(); // Saca el estatuto de la pila para saber a quién corresponde el End
-                    int direccionDo = (int) dir.pop(); // Saca la dirección del Do
+    System.out.println("Token 'While' encontrado.");
+    est.push("mientras");
+    dir.push(i); // Almacena la dirección siguiente al While
+}
 
-                    vci.enqueue(Integer.toString(direccionDo)); // Agrega la dirección del "Mientras" antes del "Fin-mientras"
-                    i++;
-                    posicion.enqueue(i);
-                    vci.enqueue("Fin-mientras"); // Genera token END-WHILE
-                    i++;
-                    posicion.enqueue(i);
-                }
 
-             // Empujar "Repetir" y su dirección a las pilas cuando se encuentra el token "Repetir"
-                if (numeroToken == -9) {
-                    i++; // Incrementar i antes de agregar la dirección del "Repetir" al VCI
-                    est.push("repetir");
-                    dir.push(i); // La dirección actual del "Repetir"
-                }
+if (numeroToken == -17) { // Token "Do"
+    System.out.println("Encontrado token 'Do'.");
+    while (!stack.isEmpty()) {
+        vci.enqueue(stack.top());
+        stack.pop();
+        i++;
+        posicion.enqueue(i);
+    }
+    vci.enqueue(""); // Casilla vacía
+    int direccionCasillaVacia = i; // Guarda la dirección de la casilla vacía
+    i++;
+    posicion.enqueue(i);
+    dir.push(direccionCasillaVacia); // Almacena la dirección de la casilla vacía
+    vci.enqueue("hacer"); // Genera token Do
+    i++;
+    posicion.enqueue(i);
+}
 
-                // Evaluar condición y almacenar dirección de "Hasta" en VCI si la condición es verdadera
-                if (numeroToken == -10) { // Token de "Hasta"
+if (numeroToken == -3 && !est.isEmpty() && est.top().equals("mientras")) { // Token "End"
+    System.out.println("Encontrado token 'End' para 'While'.");
+    est.pop(); // Saca el estatuto de la pila para saber a quién corresponde el End
+    int direccionDo = (int) dir.pop(); // Saca la dirección del Do
 
-                    if (evaluarCondicion()) {
-                        // Guardar la dirección actual antes de agregar el token "Hasta"
-                        int direccionActual = i;
+    // Guarda la dirección actual + 2 en la posición que tenía el directorio
+    int nuevaDireccion = i + 2;
+    vci.enqueue(Integer.toString(direccionDo), nuevaDireccion);
+    i++;
+    posicion.enqueue(i);
 
-                        // Agregar el token "Hasta" al VCI después de terminar de evaluar todo el bloque de código
-                        while (!stack.isEmpty()) {
-                            vci.enqueue(stack.top());
-                            stack.pop();
-                            fals.pop();
-                            i++;
-                            posicion.enqueue(i);
-                        }
+    // Pop del directorio y guarda la dirección en VCI
+    vci.enqueue(Integer.toString((int) dir.pop()));
+    i++;
+    posicion.enqueue(i);
 
-                        // Agregar el token "Hasta" al final del VCI
-                        vci.enqueue(token);
-                        i++;
-                        posicion.enqueue(i);
+    vci.enqueue("Fin-mientras"); // Genera token END-WHILE
+    i++;
+    posicion.enqueue(i);
+    fals.push(0); // Indicar que se procesó correctamente la condición
+}
 
-                        // Restaurar la dirección actual
-                        dir.push(direccionActual);
-                    }
-                }
 
                 // Pop "Repetir" de la pila de estatutos y guardar dirección en VCI cuando se encuentra "End"
                 if (numeroToken == -3) { // Token "End"
@@ -315,109 +303,7 @@ public class prueba {
                         fals.push(40);
                     }
                 }
-              
-                //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-             // ==
-                if (numeroToken == -35) {
-                    if ((int) fals.top() == 40) {
-                        do {
-                            vci.enqueue(stack.top());
-                            i++;
-                            posicion.enqueue(i);
-                            stack.pop();
-                            fals.pop();
-                        } while ((int) fals.top() != 0 || (int) fals.top() > 40);
-                    }
-                    if ((int) fals.top() == 0 || (int) fals.top() <= 40) {
-                        stack.push(token);
-                        fals.push(40);
-                    }
-                }
 
-                // !=
-                if (numeroToken == -36) {
-                    if ((int) fals.top() == 40) {
-                        do {
-                            vci.enqueue(stack.top());
-                            i++;
-                            posicion.enqueue(i);
-                            stack.pop();
-                            fals.pop();
-                        } while ((int) fals.top() != 0 || (int) fals.top() > 40);
-                    }
-                    if ((int) fals.top() == 0 || (int) fals.top() <= 40) {
-                        stack.push(token);
-                        fals.push(40);
-                    }
-                }
-
-                // <=
-                if (numeroToken == -32) {
-                    if ((int) fals.top() == 40) {
-                        do {
-                            vci.enqueue(stack.top());
-                            i++;
-                            posicion.enqueue(i);
-                            stack.pop();
-                            fals.pop();
-                        } while ((int) fals.top() != 0 || (int) fals.top() > 40);
-                    }
-                    if ((int) fals.top() == 0 || (int) fals.top() <= 40) {
-                        stack.push(token);
-                        fals.push(40);
-                    }
-                }
-
-                // &&
-                if (numeroToken == -41) {
-                    if ((int) fals.top() == 40) {
-                        do {
-                            vci.enqueue(stack.top());
-                            i++;
-                            posicion.enqueue(i);
-                            stack.pop();
-                            fals.pop();
-                        } while ((int) fals.top() != 0 || (int) fals.top() > 40);
-                    }
-                    if ((int) fals.top() == 0 || (int) fals.top() <= 40) {
-                        stack.push(token);
-                        fals.push(40);
-                    }
-                }
-
-                // ||
-                if (numeroToken == -42) {
-                    if ((int) fals.top() == 40) {
-                        do {
-                            vci.enqueue(stack.top());
-                            i++;
-                            posicion.enqueue(i);
-                            stack.pop();
-                            fals.pop();
-                        } while ((int) fals.top() != 0 || (int) fals.top() > 40);
-                    }
-                    if ((int) fals.top() == 0 || (int) fals.top() <= 40) {
-                        stack.push(token);
-                        fals.push(40);
-                    }
-                }
-
-                // !
-                if (numeroToken == -43) {
-                    if ((int) fals.top() == 40) {
-                        do {
-                            vci.enqueue(stack.top());
-                            i++;
-                            posicion.enqueue(i);
-                            stack.pop();
-                            fals.pop();
-                        } while ((int) fals.top() != 0 || (int) fals.top() > 40);
-                    }
-                    if ((int) fals.top() == 0 || (int) fals.top() <= 40) {
-                        stack.push(token);
-                        fals.push(40);
-                    }
-                }
 
                 if (numeroToken == -6 || numeroToken == -7) {
                     fals.push(token.getLine());

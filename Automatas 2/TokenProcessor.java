@@ -208,7 +208,7 @@ class TokenProcessor {
     public static void printModifiedTokenTable(List<Token> tokens) throws IOException {
         try (FileOutputStream outputStream = new FileOutputStream("tabla.txt")) {
             for (Token token : tokens) {
-                outputStream.write(token.toString().getBytes()); // Write bytes directly to avoid String limitations
+                outputStream.write(token.toString().getBytes()); 
                 outputStream.write("\n".getBytes());
             }
         } catch (IOException e) {
@@ -216,7 +216,7 @@ class TokenProcessor {
         }
     }
 
-    private static boolean checkVariableDeclaration(List<Token> tokens) {
+    private static boolean errores(List<Token> tokens) {
         boolean error = false;
         Map<String, Integer> declaredVariables = new HashMap<>();
         boolean dentroDeDeclaracion = false;
@@ -231,7 +231,7 @@ class TokenProcessor {
                 dentroDeDeclaracion = false;
                 tipoDeclaracionActual = -1;
             }
-            // Verificar si estamos dentro de la sección de declaración
+            // Tipo de declaración incorrecta
             if (dentroDeDeclaracion) {
                 if (token.getToken() == -11 || token.getToken() == -12 || token.getToken() == -13
                         || token.getToken() == -14) {
@@ -244,7 +244,6 @@ class TokenProcessor {
                             (tipoDeclaracionActual == -12 && token.getToken() != -52) ||
                             (tipoDeclaracionActual == -13 && token.getToken() != -53) ||
                             (tipoDeclaracionActual == -14 && token.getToken() != -54)) {
-                        // Error: Tipo de variable incorrecto para el tipo de declaración actual
                         System.out.println("Error: El tipo de variable '" + token.getLexema()
                                 + "' declarado no coincide con el tipo de declaración actual (línea " + token.getLine()
                                 + ")");
@@ -253,8 +252,7 @@ class TokenProcessor {
                     }
                 }
             }
-            // Verificar si hay operaciones y si las variables involucradas tienen tipos
-            // diferentes
+            // Operación entre variables de diferente tipo
             if (i > 0 && i < tokens.size() - 1) {
                 Token tokenAnterior = tokens.get(i - 1);
                 Token tokenSiguiente = tokens.get(i + 1);
@@ -279,27 +277,24 @@ class TokenProcessor {
                 }
             }
 
-            // Checar si la variable esta declarada
+            // Variable duplicada
             if (dentroDeDeclaracion && (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53
                     || token.getToken() == -54)) {
                 String lexema = token.getLexema();
                 if (!declaredVariables.containsKey(lexema)) {
                     declaredVariables.put(lexema, i);
                 } else {
-                    // Error: Variable duplicada en la sección de declaración
                     System.out.println("Error: Variable '" + lexema
                             + "' declarada multiples veces (line " + token.getLine() + ")");
                     token.setError(true);
                     error = true;
                 }
             }
-            // Verificar si alguna variable fuera de la sección de declaración fue declarada
-            // previamente
+            //Variable no declarada
             if (!dentroDeDeclaracion && (token.getToken() == -51 || token.getToken() == -52 || token.getToken() == -53
                     || token.getToken() == -54)) {
                 String lexema = token.getLexema();
                 if (!declaredVariables.containsKey(lexema)) {
-                    // Error: Variable no declarada usada fuera de la sección de declaración
                     System.out.println(
                             "Error: Variable '" + lexema + "' no está declarada (linea " + token.getLine() + ")");
                     token.setError(true);
@@ -317,7 +312,7 @@ class TokenProcessor {
             List<Token> tokens = leerTokens(archivoEntrada);
             Map<String, Symbol> symbolTable = processSymbolTable(tokens);
             Map<String, Symbol> addressTable = processAddressTable(tokens);
-            errorEnDeclaracion = checkVariableDeclaration(tokens);
+            errorEnDeclaracion = errores(tokens);
             if (!errorEnDeclaracion) {
                 writeSymbolTableToFile(symbolTable, tablaSimbolos);
                 writeAddressTableToFile(addressTable, tablaDirecciones);
