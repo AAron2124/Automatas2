@@ -1,32 +1,59 @@
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class optimizacion {
 
     public static void main(String[] args) {
-        int n = 1000000000;
-        long startTime = System.nanoTime();
-        int numThreads = Runtime.getRuntime().availableProcessors();
+        //Manejo de sub expresiones, AAron Colombres
+        noOpti();
+        opti();
 
-       ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-        long sum = 0;
-        try {
-            sum = executor.submit(() -> {
-                long partialSum = 0;
-                for (int i = 1; i <= n; i++) {
-                    partialSum += i;
-                }
-                return partialSum;
-            }).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        long endTime = System.nanoTime() - startTime;
-        System.out.println("Duración: " + (endTime - startTime) / 1e6 + " ms");
-        
-        System.out.println("Suma: " + sum);
-       
+    }
+
+    public static void noOpti() {
+        long startTime = System.nanoTime();
+        int cantidadArticulo1 = 4;
+        double precioArticulo1 = 20.0;
+        int cantidadArticulo2 = 6;
+        double precioArticulo2 = 30.0;
+        double impuesto = 0.20;
+
+        // Cálculo del costo total del artículo 1 con impuestos
+        double costoTotalArticulo1 = cantidadArticulo1 * precioArticulo1 * (1 + impuesto);//Se repite
+
+        // Cálculo del costo total del artículo 2 con impuestos
+        double costoTotalArticulo2 = cantidadArticulo2 * precioArticulo2 * (1 + impuesto);//Se repite
+
+        // Cálculo del costo total de la compra
+        double costoTotalCompra = costoTotalArticulo1 + costoTotalArticulo2;
+
+        System.out.println("Costo total de la compra: " + costoTotalCompra);
+        long endTime = System.nanoTime();
+        System.out.println("Duración no opti: " + (endTime - startTime) / 1e6 + " ms");
+
+    }
+
+    public static void opti() {
+        long startTime = System.nanoTime();
+        int cantidadArticulo1 = 4;
+        double precioArticulo1 = 20.0;
+        int cantidadArticulo2 = 6;
+        double precioArticulo2 = 30.0;
+        double impuesto = 0.20;
+
+        // Cálculo del impuesto total una sola vez
+        double impuestoTotal = 1 + impuesto;
+
+        // Cálculo del costo total del artículo 1 con impuestos
+        double costoTotalArticulo1 = cantidadArticulo1 * precioArticulo1 * impuestoTotal;
+
+        // Cálculo del costo total del artículo 2 con impuestos
+        double costoTotalArticulo2 = cantidadArticulo2 * precioArticulo2 * impuestoTotal;
+
+        // Cálculo del costo total de la compra
+        double costoTotalCompra = costoTotalArticulo1 + costoTotalArticulo2;
+
+        System.out.println("Costo total de la compra: " + costoTotalCompra);
+        long endTime = System.nanoTime();
+        System.out.println("Duración opti: " + (endTime - startTime) / 1e6 + " ms");
     }
 
 }

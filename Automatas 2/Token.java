@@ -1,6 +1,6 @@
 public class Token {
     private String lexema;
-    private int token;
+    int token;
     private int positionTable;
     private int line;
     private String value;
@@ -59,6 +59,10 @@ public class Token {
 
     public Token(String value) {
         this.value = value;
+    }
+
+    public Token(String lexema2, Object object, Object object2, Object object3) {
+        //TODO Auto-generated constructor stub
     }
 
     public String getValue() {

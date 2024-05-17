@@ -11,12 +11,19 @@ public class Pila {
         top = newNode;
     }
 
+
+
     public Object pop() {
         if (isEmpty())
             throw new IllegalStateException("La pila está vacía");
         Object data = top.data;
         top = top.next;
         return data;
+    }
+    public static void vaciarPila(Pila pila, Cola cola) {
+        while (!pila.isEmpty()) {
+            cola.enqueue(pila.pop());
+        }
     }
 
     public Object top() {
